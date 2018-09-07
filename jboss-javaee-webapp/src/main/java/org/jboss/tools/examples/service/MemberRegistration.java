@@ -49,6 +49,17 @@ public class MemberRegistration {
     }
     
     /**
+     * Permite actualizar un objeto Member en la base de datos
+     * @param member
+     * @throws Exception
+     */
+    public void actualizar(Member member) throws Exception {
+        log.info("Actualizando " + member.getName());
+         em.merge(member);
+        memberEventSrc.fire(member);
+    }
+    
+    /**
      * Elimina objeto memeber de la base de datos
      * @param id
      * @throws Exception

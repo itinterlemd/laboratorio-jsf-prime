@@ -19,9 +19,11 @@ package org.jboss.tools.examples.controller;
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Model;
 import javax.faces.application.FacesMessage;
+import javax.faces.bean.ManagedBean;
+import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.inject.Inject;
-import javax.inject.Named;
+//import javax.inject.Named;
 
 import org.jboss.tools.examples.data.MemberRepository;
 import org.jboss.tools.examples.model.Member;
@@ -32,6 +34,8 @@ import org.jboss.tools.examples.service.MemberRegistration;
 // Read more about the @Model stereotype in this FAQ:
 // http://www.cdi-spec.org/faq/#accordion6
 @Model
+@ManagedBean
+@ViewScoped
 public class RegistroPrimeController {
 
     @Inject
@@ -60,6 +64,16 @@ public class RegistroPrimeController {
 
     public void register() throws Exception {
         try {
+        	
+        	if(newMember!=null 
+        			&& newMember.getId()!=null) {
+        		
+        		actualizar();
+        		return;
+        		
+        	}
+        	
+        	
         	if(newMember==null) {
         		FacesMessage m = new FacesMessage(FacesMessage.SEVERITY_ERROR, "error!", "error inesperado");
                 facesContext.addMessage(null, m);
@@ -76,6 +90,32 @@ public class RegistroPrimeController {
         }
     }
     
+    public void actualizar() throws Exception {
+        try {
+        	if(newMember==null && newMember.getId()!=null 
+        			&& newMember.getEmail()!=null) {
+        		
+        		FacesMessage m = new FacesMessage(
+        				FacesMessage.SEVERITY_ERROR, 
+        				"error!", "error validando ");
+                facesContext.addMessage(null, m);
+                return;
+        	}
+        	
+            memberRegistration.actualizar(newMember);
+            FacesMessage m = new FacesMessage(
+            		FacesMessage.SEVERITY_INFO, 
+            		"Actualizando!", "Actualizacion successful");
+            facesContext.addMessage(null, m);
+            initNewMember();
+                        
+        } catch (Exception e) {
+            String errorMessage = getRootErrorMessage(e);
+            FacesMessage m = new FacesMessage(FacesMessage.SEVERITY_ERROR, errorMessage, "Registration unsuccessful");
+            facesContext.addMessage(null, m);
+        }
+    }
+    
     /**
      * remover objeto memeber por id
      * @param idAEliminar
@@ -84,9 +124,11 @@ public class RegistroPrimeController {
     public void remover(Long idAEliminar) throws Exception {
         try {
             memberRegistration.borrar(idAEliminar);
+            consultarTodos();
             FacesMessage m = new FacesMessage
             		(FacesMessage.SEVERITY_INFO, "Eliminado!", 
             				"REliminado id: "+idAEliminar);
+            
             facesContext.addMessage(null, m);
           
         } catch (Exception e) {
